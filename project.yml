@@ -9,6 +9,8 @@ settings:
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: 4G5JHTY4LY
+    CODE_SIGN_STYLE: Automatic
     CODE_SIGN_ENTITLEMENTS: SnippetMini/SnippetMini.entitlements
     ENABLE_HARDENED_RUNTIME: YES
 targets:
