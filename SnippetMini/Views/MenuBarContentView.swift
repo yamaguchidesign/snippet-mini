@@ -6,15 +6,21 @@ struct MenuBarContentView: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        if store.snippets.isEmpty {
-            Text("スニペットがありません")
+        Button("スニペットを挿入…  ⌥⌘Space") {
+            SnippetPickerController.shared.show(store: store)
+        }
+        .disabled(store.snippets.isEmpty)
+
+        Divider()
+
+        if PasteService.isAccessibilityTrusted {
+            Text("アクセシビリティ: 許可済み")
                 .foregroundStyle(.secondary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
         } else {
-            ForEach(store.snippets) { snippet in
-                Button(snippet.title) {
-                    store.copyExpandedBody(of: snippet)
+            Button("アクセシビリティを許可…") {
+                PasteService.requestAccessibility(prompt: true)
+                if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+                    NSWorkspace.shared.open(url)
                 }
             }
         }
