@@ -1,0 +1,14 @@
+Snippet Mini is a utility that inserts user-defined text snippets into any text field, triggered explicitly by the user.
+
+- A global hotkey (Option-Command-Space) shows a picker panel.
+- Only when the user selects a snippet with arrow keys and presses Enter does the app insert text into the app that was frontmost.
+- Insertion is done by placing text on the pasteboard and posting a Command-V keystroke (CGEvent).
+- This keystroke posting requires the macOS Accessibility permission, which the user grants explicitly in System Settings. The app explains the purpose in-app.
+- If Accessibility is not granted, the app falls back to simply copying the text to the clipboard, so the app remains functional.
+
+The app does not read or monitor the contents of other apps. Accessibility is used solely to insert the snippet the user chose. No network requests, no data collection, no tracking. All data is stored locally within the App Sandbox.
+
+How to test:
+1. Launch the app (a menu bar icon appears at the top-right).
+2. Grant Accessibility to Snippet Mini in System Settings > Privacy & Security > Accessibility.
+3. In any text editor, press Option-Command-Space, pick a snippet with arrow keys, and press Enter. The snippet is inserted into the editor.
