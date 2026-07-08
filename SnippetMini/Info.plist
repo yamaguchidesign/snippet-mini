@@ -26,6 +26,17 @@
 	<string>public.app-category.productivity</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.yamaguchidesign.snippet-mini</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>snippetmini</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2026 yamaguchidesign. All rights reserved.</string>
 </dict>

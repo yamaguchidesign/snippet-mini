@@ -16,7 +16,6 @@
 		88FB3C29C1EDCEFB6CF4EFE4 /* SnippetPickerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F497E228C026ECDB50D9A0 /* SnippetPickerController.swift */; };
 		893C073E834538C85DCF0356 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F17B8D0819BA4624A6955 /* MenuBarContentView.swift */; };
 		8E59FBFB8D0D438DEAC8F17C /* VariableExpander.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC6C19A8576ED595651511B1 /* VariableExpander.swift */; };
-		9B46484B07E49450684CF223 /* HotKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921DCFA9C9791D40977453F0 /* HotKeyManager.swift */; };
 		BCF4E3B07163E174E4030A26 /* Snippet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931A8C411CBBFCC13762DE16 /* Snippet.swift */; };
 		CB27FBA8CBA6C05443A21777 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E101C49E30F8D61894D7D6D0 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
@@ -25,7 +24,6 @@
 		04253B04653C1CC650CAC54F /* SnippetEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetEditorView.swift; sourceTree = "<group>"; };
 		0B68B19ABD528116B5ADF702 /* SnippetMini.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SnippetMini.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		19C44A8D881B75FDAB43B8D0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		921DCFA9C9791D40977453F0 /* HotKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyManager.swift; sourceTree = "<group>"; };
 		931A8C411CBBFCC13762DE16 /* Snippet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snippet.swift; sourceTree = "<group>"; };
 		9DDAA7F5B638E5A7AEFB83A3 /* SnippetMini.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SnippetMini.entitlements; sourceTree = "<group>"; };
 		9E6F17B8D0819BA4624A6955 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
@@ -61,7 +59,6 @@
 		4860AEFDD0936A442F6B7D31 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				921DCFA9C9791D40977453F0 /* HotKeyManager.swift */,
 				F0DC5BA2387C01DAE132A631 /* PasteService.swift */,
 				C4F497E228C026ECDB50D9A0 /* SnippetPickerController.swift */,
 				D96A83C41AA5BBBDCF0E1723 /* SnippetStore.swift */,
@@ -173,7 +170,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CB27FBA8CBA6C05443A21777 /* AppDelegate.swift in Sources */,
-				9B46484B07E49450684CF223 /* HotKeyManager.swift in Sources */,
 				893C073E834538C85DCF0356 /* MenuBarContentView.swift in Sources */,
 				40C7AE3DDB1F4A621C06268D /* PasteService.swift in Sources */,
 				BCF4E3B07163E174E4030A26 /* Snippet.swift in Sources */,

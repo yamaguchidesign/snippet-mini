@@ -1,6 +1,6 @@
 # Snippet Mini
 
-よく使う定型文（スニペット）をメニューバーから、あるいはグローバルホットキーで
+よく使う定型文（スニペット）を、メニューバーや外部ツールのショートカットから
 どのアプリにも即挿入できる macOS 常駐アプリ。
 
 メール・Slack・Figma のテキストなど、繰り返し打つ文章をワンアクションで貼り付ける。
@@ -8,7 +8,8 @@
 ## 特徴
 
 - **メニューバー常駐**（📄 アイコン）。Dock には出ない軽量アプリ
-- **グローバルホットキー `⌥⌘Space`** でどのアプリからでもスニペット選択パネルを呼び出し
+- **URL スキーム `snippetmini://`** で選択パネルを呼び出し。ホットキーは
+  BetterTouchTool / Raycast / Shortcuts など好きなツールで自由に割り当てられる
 - 選ぶと**直前に使っていたアプリへ自動ペースト**（⌘V を送出）
 - **変数展開**で日付・改行を自動挿入
 - データはローカルの JSON に保存（クラウド送信なし）
@@ -38,10 +39,28 @@
 📄 → **「スニペットを管理…」** で管理ウィンドウを開き、タイトルと本文を登録。
 並び替え・編集・削除もここで行う。
 
-### 4. 挿入
+### 4. ショートカットを割り当てる
 
-- **ホットキー `⌥⌘Space`** を押す → 選択パネルが出る → スニペットを選ぶと直前のアプリに貼り付け
-- もしくは 📄 → **「スニペットを挿入…」** から
+内蔵ホットキーは持たず、URL スキームで呼び出す方式。BetterTouchTool などで
+好きなキーに以下の URL を割り当てる（アクション =「Open URL」）。
+
+| URL | 動作 |
+| --- | --- |
+| `snippetmini://pick` | 選択パネルを表示（おすすめ） |
+| `snippetmini://toggle` | 押すたび表示 / 非表示を切り替え |
+| `snippetmini://` | `pick` と同じ |
+
+> `⌥⌘Space` は macOS 標準の「Finder 検索ウィンドウ」に予約済みなので避ける。
+
+### 5. 挿入
+
+ショートカット（または 📄 →「スニペットを挿入…」）で選択パネルを開き、
+スニペットを選ぶと直前に使っていたアプリへ貼り付けられる。
+
+### 自動起動（任意）
+
+`システム設定 → 一般 → ログイン項目` に `/Applications/SnippetMini.app` を追加すると、
+常駐が途切れずショートカットからいつでも呼べる。
 
 ## 変数
 
@@ -82,12 +101,11 @@ xcodebuild -project SnippetMini.xcodeproj -scheme SnippetMini -configuration Rel
 ```
 SnippetMini/
 ├── SnippetMiniApp.swift        # エントリポイント（MenuBarExtra + 管理ウィンドウ）
-├── AppDelegate.swift           # ホットキー登録・ピッカー初期化
+├── AppDelegate.swift           # URL スキーム(snippetmini://)の受信・ピッカー初期化
 ├── Models/
 │   └── Snippet.swift           # スニペットのデータモデル
 ├── Services/
 │   ├── SnippetStore.swift      # 保存・読み込み・CRUD（JSON 永続化）
-│   ├── HotKeyManager.swift     # ⌥⌘Space のグローバルホットキー（Carbon）
 │   ├── SnippetPickerController.swift # 選択パネルの表示制御
 │   ├── PasteService.swift      # クリップボード操作 + ⌘V 送出
 │   └── VariableExpander.swift  # {{date}} / {{newline}} などの変数展開

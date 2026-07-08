@@ -6,15 +6,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         SnippetPickerController.shared.configure(store: store)
-
-        HotKeyManager.shared.onTrigger = { [weak self] in
-            guard let self else { return }
-            SnippetPickerController.shared.toggle(store: self.store)
-        }
-        HotKeyManager.shared.register()
     }
 
-    func applicationWillTerminate(_ notification: Notification) {
-        HotKeyManager.shared.unregister()
+    // BetterTouchTool などの外部ツールから snippetmini:// で
+    // スニペット選択パネルを呼び出す。ホットキーは外部ツール側で割り当てる。
+    //   snippetmini://          → パネルを表示
+    //   snippetmini://pick      → パネルを表示
+    //   snippetmini://toggle    → 表示中なら閉じる／非表示なら表示
+    func application(_ application: NSApplication, open urls: [URL]) {
+        for url in urls where url.scheme == "snippetmini" {
+            if url.host == "toggle" {
+                SnippetPickerController.shared.toggle(store: store)
+            } else {
+                SnippetPickerController.shared.show(store: store)
+            }
+        }
     }
 }
