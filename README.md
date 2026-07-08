@@ -36,8 +36,14 @@
 
 ### 3. スニペットを登録
 
-📄 → **「スニペットを管理…」** で管理ウィンドウを開き、タイトルと本文を登録。
-並び替え・編集・削除もここで行う。
+管理ウィンドウを開いてタイトルと本文を登録する。開き方は次のいずれか。
+
+- メニューバー 📄 → **「スニペットを管理…」**
+- 選択パネル右上の **⚙️ アイコン**
+- `snippetmini://settings`（ショートカットに割り当ても可）
+
+並び替え・編集・削除も管理ウィンドウで行う。管理ウィンドウは自動では開かず、
+上記の操作をしたときだけ開く。
 
 ### 4. ショートカットを割り当てる
 
@@ -48,6 +54,7 @@
 | --- | --- |
 | `snippetmini://pick` | 選択パネルを表示（おすすめ） |
 | `snippetmini://toggle` | 押すたび表示 / 非表示を切り替え |
+| `snippetmini://settings` | スニペット管理ウィンドウを開く |
 | `snippetmini://` | `pick` と同じ |
 
 > `⌥⌘Space` は macOS 標準の「Finder 検索ウィンドウ」に予約済みなので避ける。
@@ -107,6 +114,7 @@ SnippetMini/
 ├── Services/
 │   ├── SnippetStore.swift      # 保存・読み込み・CRUD（JSON 永続化）
 │   ├── SnippetPickerController.swift # 選択パネルの表示制御
+│   ├── EditorWindowController.swift  # 管理ウィンドウの開閉（AppKit）
 │   ├── PasteService.swift      # クリップボード操作 + ⌘V 送出
 │   └── VariableExpander.swift  # {{date}} / {{newline}} などの変数展開
 └── Views/

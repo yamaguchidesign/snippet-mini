@@ -10,11 +10,5 @@ struct SnippetMiniApp: App {
                 .environmentObject(appDelegate.store)
         }
         .menuBarExtraStyle(.menu)
-
-        Window("スニペット管理", id: "editor") {
-            SnippetEditorView()
-                .environmentObject(appDelegate.store)
-        }
-        .defaultSize(width: 640, height: 420)
     }
 }

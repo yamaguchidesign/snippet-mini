@@ -47,7 +47,7 @@ final class SnippetPickerController {
 
     private func makePanel(store: SnippetStore) -> KeyablePanel {
         let panel = KeyablePanel(
-            contentRect: NSRect(x: 0, y: 0, width: 360, height: 300),
+            contentRect: NSRect(x: 0, y: 0, width: 440, height: 360),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -71,6 +71,13 @@ final class SnippetPickerController {
             },
             onCancel: { [weak self] in
                 self?.dismiss()
+            },
+            onOpenSettings: { [weak self] in
+                guard let self else { return }
+                self.dismiss()
+                if let store = self.store {
+                    EditorWindowController.shared.show(store: store)
+                }
             }
         )
         .environmentObject(store)

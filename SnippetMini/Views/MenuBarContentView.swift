@@ -3,7 +3,6 @@ import SwiftUI
 
 struct MenuBarContentView: View {
     @EnvironmentObject private var store: SnippetStore
-    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         Button("スニペットを挿入…  ⌥⌘Space") {
@@ -28,8 +27,7 @@ struct MenuBarContentView: View {
         Divider()
 
         Button("スニペットを管理…") {
-            openWindow(id: "editor")
-            NSApp.activate(ignoringOtherApps: true)
+            EditorWindowController.shared.show(store: store)
         }
 
         Button("終了") {

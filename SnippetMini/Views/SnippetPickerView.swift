@@ -6,59 +6,25 @@ struct SnippetPickerView: View {
     @Binding var selectedIndex: Int
     let onConfirm: (Snippet) -> Void
     let onCancel: () -> Void
+    let onOpenSettings: () -> Void
 
     @FocusState private var isFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
-            if store.snippets.isEmpty {
-                ContentUnavailableView(
-                    "スニペットがありません",
-                    systemImage: "doc.text",
-                    description: Text("メニューバーから管理画面を開いて追加してください。")
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                ScrollViewReader { proxy in
-                    List {
-                        ForEach(Array(store.snippets.enumerated()), id: \.element.id) { index, snippet in
-                            SnippetPickerRow(
-                                snippet: snippet,
-                                isSelected: index == selectedIndex
-                            )
-                            .id(index)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                selectedIndex = index
-                                confirmSelection()
-                            }
-                        }
-                    }
-                    .listStyle(.plain)
-                    .scrollContentBackground(.hidden)
-                    .onChange(of: selectedIndex) { _, newValue in
-                        withAnimation(.easeInOut(duration: 0.12)) {
-                            proxy.scrollTo(newValue, anchor: .center)
-                        }
-                    }
-                }
-            }
-
-            Divider()
-
-            HStack {
-                Text("↑↓ 選択　↩ 挿入　⎋ 閉じる")
-                Spacer()
-                Text("⌥⌘Space")
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            header
+            Divider().opacity(0.4)
+            content
+            Divider().opacity(0.4)
+            footer
         }
-        .frame(width: 360, height: 300)
+        .frame(width: 440, height: 360)
         .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+        )
         .focusable()
         .focused($isFocused)
         .onAppear {
@@ -83,10 +49,82 @@ struct SnippetPickerView: View {
         }
     }
 
+    // MARK: - Sections
+
+    private var header: some View {
+        HStack(spacing: 9) {
+            Image(systemName: "doc.on.clipboard")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.secondary)
+            Text("スニペット")
+                .font(.system(size: 15, weight: .semibold))
+            Spacer()
+            Image(systemName: "gearshape")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(.secondary)
+                .frame(width: 28, height: 28)
+                .contentShape(Rectangle())
+                .onTapGesture { onOpenSettings() }
+                .help("スニペットを管理")
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if store.snippets.isEmpty {
+            ContentUnavailableView(
+                "スニペットがありません",
+                systemImage: "doc.text",
+                description: Text("右上の設定から追加してください。")
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 2) {
+                        ForEach(Array(store.snippets.enumerated()), id: \.element.id) { index, snippet in
+                            SnippetPickerRow(
+                                snippet: snippet,
+                                isSelected: index == selectedIndex
+                            )
+                            .id(index)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedIndex = index
+                                confirmSelection()
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+                }
+                .onChange(of: selectedIndex) { _, newValue in
+                    withAnimation(.easeInOut(duration: 0.12)) {
+                        proxy.scrollTo(newValue, anchor: .center)
+                    }
+                }
+            }
+        }
+    }
+
+    private var footer: some View {
+        HStack(spacing: 16) {
+            KeyHint(key: "↑↓", label: "選択")
+            KeyHint(key: "↩", label: "挿入")
+            KeyHint(key: "esc", label: "閉じる")
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+
+    // MARK: - Actions
+
     private func moveSelection(by offset: Int) {
         guard !store.snippets.isEmpty else { return }
-        let next = min(max(selectedIndex + offset, 0), store.snippets.count - 1)
-        selectedIndex = next
+        selectedIndex = min(max(selectedIndex + offset, 0), store.snippets.count - 1)
     }
 
     private func confirmSelection() {
@@ -100,29 +138,60 @@ private struct SnippetPickerRow: View {
     let isSelected: Bool
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(snippet.title)
-                    .font(.body.weight(isSelected ? .semibold : .regular))
-                    .foregroundStyle(isSelected ? Color.accentColor : Color.primary)
+        HStack(spacing: 12) {
+            Image(systemName: "text.alignleft")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(isSelected ? Color.white : Color.secondary)
+                .frame(width: 30, height: 30)
+                .background(
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .fill(isSelected ? Color.accentColor : Color.primary.opacity(0.06))
+                )
 
+            VStack(alignment: .leading, spacing: 2) {
+                Text(snippet.title)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
                 Text(preview)
-                    .font(.caption)
+                    .font(.system(size: 12))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
+
             Spacer(minLength: 0)
         }
-        .padding(.vertical, 4)
-        .listRowBackground(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .fill(isSelected ? Color.accentColor.opacity(0.14) : Color.clear)
-                .padding(.horizontal, 4)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(isSelected ? Color.accentColor.opacity(0.15) : Color.clear)
         )
     }
 
     private var preview: String {
         VariableExpander.expand(snippet.body)
-            .replacingOccurrences(of: "\n", with: " / ")
+            .replacingOccurrences(of: "\n", with: " ↵ ")
+    }
+}
+
+private struct KeyHint: View {
+    let key: String
+    let label: String
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Text(key)
+                .font(.system(size: 11, weight: .semibold))
+                .padding(.horizontal, 5)
+                .padding(.vertical, 2)
+                .background(
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                        .fill(Color.primary.opacity(0.08))
+                )
+            Text(label)
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+        }
     }
 }
