@@ -129,6 +129,7 @@ private struct SnippetFormView: View {
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .textSelection(.enabled)
             }
         }
         .formStyle(.grouped)
