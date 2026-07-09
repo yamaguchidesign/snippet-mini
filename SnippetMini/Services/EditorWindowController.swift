@@ -29,6 +29,8 @@ final class EditorWindowController {
             window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
             window.setContentSize(NSSize(width: 640, height: 440))
             window.isReleasedWhenClosed = false
+            // macOS のウィンドウ状態復元で、起動のたびに勝手に開くのを防ぐ
+            window.isRestorable = false
             window.center()
             self.window = window
         }
