@@ -5,6 +5,10 @@ struct SnippetEditorView: View {
     @State private var selection: Snippet.ID?
     @State private var draftTitle = ""
     @State private var draftBody = ""
+    // loadDraft() でドラフトを書き換えている最中は onChange 経由の自動保存を止める。
+    // 選択切り替え時に「新しく読み込んだ内容」が「古いID」へ保存されてしまう
+    // 競合（別スニペットへの誤上書き）を防ぐためのガード。
+    @State private var isLoadingDraft = false
 
     var body: some View {
         NavigationSplitView {
@@ -36,18 +40,12 @@ struct SnippetEditorView: View {
                 }
             }
         } detail: {
-            if let selection, let snippet = store.snippets.first(where: { $0.id == selection }) {
+            if selection != nil {
                 SnippetFormView(
                     title: $draftTitle,
                     bodyText: $draftBody,
-                    onSave: { save(snippetID: snippet.id) }
+                    onSave: save
                 )
-                .onAppear { loadDraft(from: snippet) }
-                .onChange(of: selection) { _, newValue in
-                    if let snippet = store.snippets.first(where: { $0.id == newValue }) {
-                        loadDraft(from: snippet)
-                    }
-                }
             } else {
                 ContentUnavailableView(
                     "スニペットを選択",
@@ -61,9 +59,26 @@ struct SnippetEditorView: View {
             if selection == nil {
                 selection = store.snippets.first?.id
             }
-            if let selection, let snippet = store.snippets.first(where: { $0.id == selection }) {
-                loadDraft(from: snippet)
-            }
+            loadDraftForCurrentSelection()
+        }
+        .onChange(of: selection) { _, _ in
+            loadDraftForCurrentSelection()
+        }
+    }
+
+    private func loadDraftForCurrentSelection() {
+        isLoadingDraft = true
+        if let selection, let snippet = store.snippets.first(where: { $0.id == selection }) {
+            draftTitle = snippet.title
+            draftBody = snippet.body
+        } else {
+            draftTitle = ""
+            draftBody = ""
+        }
+        // onChange は同一ランループ内で同期的に呼ばれるため、
+        // 次のランループまでガードを維持してから解除する。
+        DispatchQueue.main.async {
+            isLoadingDraft = false
         }
     }
 
@@ -71,7 +86,6 @@ struct SnippetEditorView: View {
         store.add(title: "新しいスニペット", body: "")
         if let newest = store.snippets.last {
             selection = newest.id
-            loadDraft(from: newest)
         }
     }
 
@@ -79,21 +93,12 @@ struct SnippetEditorView: View {
         guard let selection else { return }
         store.delete(id: selection)
         self.selection = store.snippets.first?.id
-        if let first = store.snippets.first {
-            loadDraft(from: first)
-        } else {
-            draftTitle = ""
-            draftBody = ""
-        }
     }
 
-    private func loadDraft(from snippet: Snippet) {
-        draftTitle = snippet.title
-        draftBody = snippet.body
-    }
-
-    private func save(snippetID: UUID) {
-        guard var snippet = store.snippets.first(where: { $0.id == snippetID }) else { return }
+    private func save() {
+        guard !isLoadingDraft,
+              let selection,
+              var snippet = store.snippets.first(where: { $0.id == selection }) else { return }
         snippet.title = draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "無題" : draftTitle
         snippet.body = draftBody
         store.update(snippet)
@@ -108,8 +113,13 @@ private struct SnippetFormView: View {
     var body: some View {
         Form {
             Section("タイトル") {
-                TextField("", text: $title)
-                    .onChange(of: title) { _, _ in onSave() }
+                VStack(alignment: .leading, spacing: 0) {
+                    TextField("", text: $title)
+                        .textFieldStyle(.plain)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .onChange(of: title) { _, _ in onSave() }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             Section("本文") {
