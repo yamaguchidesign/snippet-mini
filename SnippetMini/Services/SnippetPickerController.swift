@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 @MainActor
-final class SnippetPickerController {
+final class SnippetPickerController: NSObject {
     static let shared = SnippetPickerController()
 
     private var panel: KeyablePanel?
@@ -12,7 +12,7 @@ final class SnippetPickerController {
     private var localKeyMonitor: Any?
     private var globalKeyMonitor: Any?
 
-    private init() {}
+    private override init() {}
 
     func configure(store: SnippetStore) {
         self.store = store
@@ -102,6 +102,7 @@ final class SnippetPickerController {
         panel.isOpaque = false
         panel.hasShadow = true
         panel.hidesOnDeactivate = false
+        panel.delegate = self
 
         let rootView = SnippetPickerView(
             selectedIndex: Binding(
@@ -182,6 +183,13 @@ final class SnippetPickerController {
                 NSWorkspace.shared.open(url)
             }
         }
+    }
+}
+
+extension SnippetPickerController: NSWindowDelegate {
+    // 他アプリのウィンドウをクリックしてキーフォーカスを失ったらパネルを消す。
+    func windowDidResignKey(_ notification: Notification) {
+        dismiss()
     }
 }
 
