@@ -5,13 +5,13 @@ import SwiftUI
 /// SwiftUI の Window シーンだとアプリのアクティブ化のたびに勝手に復元されて
 /// しまうため、必要なとき（メニューバー or パネルの設定アイコン）だけ開く。
 @MainActor
-final class EditorWindowController {
+final class EditorWindowController: NSObject, NSWindowDelegate {
     static let shared = EditorWindowController()
 
     private var window: NSWindow?
     private weak var store: SnippetStore?
 
-    private init() {}
+    private override init() {}
 
     func configure(store: SnippetStore) {
         self.store = store
@@ -31,11 +31,20 @@ final class EditorWindowController {
             window.isReleasedWhenClosed = false
             // macOS のウィンドウ状態復元で、起動のたびに勝手に開くのを防ぐ
             window.isRestorable = false
+            window.delegate = self
             window.center()
             self.window = window
         }
 
-        window?.makeKeyAndOrderFront(nil)
+        // accessory アプリのままだとウィンドウがフォーカスを得られないため、
+        // 管理ウィンドウ表示中は通常アプリ化する。
+        NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
+        window?.makeKeyAndOrderFront(nil)
+    }
+
+    // ウィンドウを閉じたらメニューバー常駐へ戻す（Dock アイコンを出さない）。
+    func windowWillClose(_ notification: Notification) {
+        NSApp.setActivationPolicy(.accessory)
     }
 }

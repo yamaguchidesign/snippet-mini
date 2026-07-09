@@ -9,6 +9,8 @@ final class SnippetPickerController {
     private var previousApp: NSRunningApplication?
     private var selectedIndex = 0
     private weak var store: SnippetStore?
+    private var localKeyMonitor: Any?
+    private var globalKeyMonitor: Any?
 
     private init() {}
 
@@ -37,18 +39,58 @@ final class SnippetPickerController {
         self.panel = panel
 
         positionPanel(panel)
-        panel.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        panel.makeKeyAndOrderFront(nil)
+
+        installKeyMonitor()
     }
 
+    /// esc / キャンセル。パネルを閉じる。
     func dismiss() {
+        hidePanel()
+    }
+
+    /// パネルを隠す（イベント監視も解除）。
+    private func hidePanel() {
+        removeKeyMonitor()
         panel?.orderOut(nil)
+    }
+
+    // esc（keyCode 53）でパネルを閉じる。
+    // バックグラウンド起動だとパネルがキー入力フォーカスを得られないことがあるため、
+    // ローカル（フォーカスがある場合）とグローバル（他アプリがアクティブでも発火）の
+    // 両方でイベントを監視する。グローバル監視はアクセシビリティ権限が前提。
+    private func installKeyMonitor() {
+        removeKeyMonitor()
+        localKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            if event.keyCode == 53 {
+                self?.dismiss()
+                return nil
+            }
+            return event
+        }
+        globalKeyMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            if event.keyCode == 53 {
+                self?.dismiss()
+            }
+        }
+    }
+
+    private func removeKeyMonitor() {
+        if let localKeyMonitor {
+            NSEvent.removeMonitor(localKeyMonitor)
+            self.localKeyMonitor = nil
+        }
+        if let globalKeyMonitor {
+            NSEvent.removeMonitor(globalKeyMonitor)
+            self.globalKeyMonitor = nil
+        }
     }
 
     private func makePanel(store: SnippetStore) -> KeyablePanel {
         let panel = KeyablePanel(
             contentRect: NSRect(x: 0, y: 0, width: 440, height: 360),
-            styleMask: [.borderless, .nonactivatingPanel],
+            styleMask: [.borderless],
             backing: .buffered,
             defer: false
         )
@@ -74,7 +116,9 @@ final class SnippetPickerController {
             },
             onOpenSettings: { [weak self] in
                 guard let self else { return }
-                self.dismiss()
+                // 管理ウィンドウを開くので accessory へは戻さず（.regular のまま）
+                // フォーカスも元アプリへ戻さない。
+                self.hidePanel()
                 if let store = self.store {
                     EditorWindowController.shared.show(store: store)
                 }
@@ -86,25 +130,28 @@ final class SnippetPickerController {
         return panel
     }
 
+    // 常に画面（マウスがあるスクリーン、無ければメイン）の中央に表示する。
     private func positionPanel(_ panel: NSPanel) {
         let mouse = NSEvent.mouseLocation
-        var frame = panel.frame
-        frame.origin = NSPoint(
-            x: mouse.x - frame.width / 2,
-            y: mouse.y - frame.height - 16
-        )
+        let screen = NSScreen.screens.first(where: { NSMouseInRect(mouse, $0.frame, false) })
+            ?? NSScreen.main
+            ?? NSScreen.screens.first
 
-        if let screen = NSScreen.screens.first(where: { NSMouseInRect(mouse, $0.frame, false) }) ?? NSScreen.main {
+        var frame = panel.frame
+        if let screen {
             let visible = screen.visibleFrame
-            frame.origin.x = min(max(frame.origin.x, visible.minX + 12), visible.maxX - frame.width - 12)
-            frame.origin.y = min(max(frame.origin.y, visible.minY + 12), visible.maxY - frame.height - 12)
+            frame.origin = NSPoint(
+                x: visible.midX - frame.width / 2,
+                y: visible.midY - frame.height / 2
+            )
         }
 
         panel.setFrame(frame, display: true)
     }
 
     private func insert(_ snippet: Snippet) {
-        dismiss()
+        hidePanel()
+        NSApp.setActivationPolicy(.accessory)
 
         let text = VariableExpander.expand(snippet.body)
 
