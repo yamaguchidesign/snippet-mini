@@ -3,12 +3,9 @@ import SwiftUI
 struct SnippetPickerView: View {
     @EnvironmentObject private var store: SnippetStore
 
-    @Binding var selectedIndex: Int
+    @ObservedObject var selection: PickerSelection
     let onConfirm: (Snippet) -> Void
-    let onCancel: () -> Void
     let onOpenSettings: () -> Void
-
-    @FocusState private var isFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -25,27 +22,8 @@ struct SnippetPickerView: View {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
         )
-        .focusable()
-        .focused($isFocused)
         .onAppear {
-            selectedIndex = min(selectedIndex, max(store.snippets.count - 1, 0))
-            isFocused = true
-        }
-        .onKeyPress(.upArrow) {
-            moveSelection(by: -1)
-            return .handled
-        }
-        .onKeyPress(.downArrow) {
-            moveSelection(by: 1)
-            return .handled
-        }
-        .onKeyPress(.return) {
-            confirmSelection()
-            return .handled
-        }
-        .onKeyPress(.escape) {
-            onCancel()
-            return .handled
+            selection.index = min(selection.index, max(store.snippets.count - 1, 0))
         }
     }
 
@@ -87,12 +65,12 @@ struct SnippetPickerView: View {
                         ForEach(Array(store.snippets.enumerated()), id: \.element.id) { index, snippet in
                             SnippetPickerRow(
                                 snippet: snippet,
-                                isSelected: index == selectedIndex
+                                isSelected: index == selection.index
                             )
                             .id(index)
                             .contentShape(Rectangle())
                             .onTapGesture {
-                                selectedIndex = index
+                                selection.index = index
                                 confirmSelection()
                             }
                         }
@@ -100,7 +78,7 @@ struct SnippetPickerView: View {
                     .padding(.horizontal, 8)
                     .padding(.vertical, 6)
                 }
-                .onChange(of: selectedIndex) { _, newValue in
+                .onChange(of: selection.index) { _, newValue in
                     withAnimation(.easeInOut(duration: 0.12)) {
                         proxy.scrollTo(newValue, anchor: .center)
                     }
@@ -122,14 +100,9 @@ struct SnippetPickerView: View {
 
     // MARK: - Actions
 
-    private func moveSelection(by offset: Int) {
-        guard !store.snippets.isEmpty else { return }
-        selectedIndex = min(max(selectedIndex + offset, 0), store.snippets.count - 1)
-    }
-
     private func confirmSelection() {
-        guard store.snippets.indices.contains(selectedIndex) else { return }
-        onConfirm(store.snippets[selectedIndex])
+        guard store.snippets.indices.contains(selection.index) else { return }
+        onConfirm(store.snippets[selection.index])
     }
 }
 

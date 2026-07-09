@@ -1,13 +1,20 @@
 import AppKit
 import SwiftUI
 
+/// パネルの選択状態。矢印キーの処理はキーウィンドウになれない場面でも
+/// 効くよう NSEvent監視側で行うため、SwiftUIのFocusStateではなくこちらで持つ。
+@MainActor
+final class PickerSelection: ObservableObject {
+    @Published var index = 0
+}
+
 @MainActor
 final class SnippetPickerController: NSObject {
     static let shared = SnippetPickerController()
 
     private var panel: KeyablePanel?
     private var previousApp: NSRunningApplication?
-    private var selectedIndex = 0
+    private let selection = PickerSelection()
     private weak var store: SnippetStore?
     private var localKeyMonitor: Any?
     private var globalKeyMonitor: Any?
@@ -34,7 +41,7 @@ final class SnippetPickerController: NSObject {
             PasteService.requestAccessibility(prompt: true)
         }
 
-        selectedIndex = 0
+        selection.index = 0
         let panel = panel ?? makePanel(store: store)
         self.panel = panel
 
@@ -56,24 +63,48 @@ final class SnippetPickerController: NSObject {
         panel?.orderOut(nil)
     }
 
-    // esc（keyCode 53）でパネルを閉じる。
+    // 上下矢印（126/125）・Return（36）・esc（53）を処理する。
     // バックグラウンド起動だとパネルがキー入力フォーカスを得られないことがあるため、
-    // ローカル（フォーカスがある場合）とグローバル（他アプリがアクティブでも発火）の
-    // 両方でイベントを監視する。グローバル監視はアクセシビリティ権限が前提。
+    // SwiftUI側のFocusStateには頼らず、ローカル（フォーカスがある場合）と
+    // グローバル（他アプリがアクティブでも発火）の両方でイベントを監視する。
+    // グローバル監視はアクセシビリティ権限が前提。
     private func installKeyMonitor() {
         removeKeyMonitor()
         localKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            if event.keyCode == 53 {
-                self?.dismiss()
-                return nil
-            }
-            return event
+            guard let self, self.handleKeyDown(keyCode: event.keyCode) else { return event }
+            return nil
         }
         globalKeyMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            if event.keyCode == 53 {
-                self?.dismiss()
-            }
+            _ = self?.handleKeyDown(keyCode: event.keyCode)
         }
+    }
+
+    /// 処理したら true を返す（呼び出し元でイベントを握りつぶすかどうかの判断に使う）。
+    @discardableResult
+    private func handleKeyDown(keyCode: UInt16) -> Bool {
+        switch keyCode {
+        case 53: // esc
+            dismiss()
+        case 126: // up
+            moveSelection(by: -1)
+        case 125: // down
+            moveSelection(by: 1)
+        case 36, 76: // return / keypad enter
+            confirmSelection()
+        default:
+            return false
+        }
+        return true
+    }
+
+    private func moveSelection(by offset: Int) {
+        guard let count = store?.snippets.count, count > 0 else { return }
+        selection.index = min(max(selection.index + offset, 0), count - 1)
+    }
+
+    private func confirmSelection() {
+        guard let snippets = store?.snippets, snippets.indices.contains(selection.index) else { return }
+        insert(snippets[selection.index])
     }
 
     private func removeKeyMonitor() {
@@ -105,15 +136,9 @@ final class SnippetPickerController: NSObject {
         panel.delegate = self
 
         let rootView = SnippetPickerView(
-            selectedIndex: Binding(
-                get: { [weak self] in self?.selectedIndex ?? 0 },
-                set: { [weak self] in self?.selectedIndex = $0 }
-            ),
+            selection: selection,
             onConfirm: { [weak self] snippet in
                 self?.insert(snippet)
-            },
-            onCancel: { [weak self] in
-                self?.dismiss()
             },
             onOpenSettings: { [weak self] in
                 guard let self else { return }
