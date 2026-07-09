@@ -111,38 +111,61 @@ private struct SnippetFormView: View {
     let onSave: () -> Void
 
     var body: some View {
-        Form {
-            Section("タイトル") {
-                VStack(alignment: .leading, spacing: 0) {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                sectionCard(title: "タイトル") {
                     TextField("", text: $title)
                         .textFieldStyle(.plain)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .multilineTextAlignment(.leading)
                         .onChange(of: title) { _, _ in onSave() }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
 
-            Section("本文") {
-                TextEditor(text: $bodyText)
-                    .font(.body.monospaced())
-                    .frame(minHeight: 180)
-                    .onChange(of: bodyText) { _, _ in onSave() }
-            }
-
-            Section {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("使える変数")
-                        .font(.subheadline.weight(.semibold))
-                    Text("{{date}} … 今日の日付（yyyy/MM/dd）")
-                    Text("{{newline}} … 改行")
-                    Text("\\n … 改行（エスケープ表記）")
+                sectionCard(title: "本文") {
+                    TextEditor(text: $bodyText)
+                        .font(.body.monospaced())
+                        .frame(minHeight: 180)
+                        .scrollContentBackground(.hidden)
+                        .onChange(of: bodyText) { _, _ in onSave() }
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .textSelection(.enabled)
+
+                sectionCard(title: nil) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("使える変数")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+                        Text("{{date}} … 今日の日付（yyyy/MM/dd）")
+                        Text("{{newline}} … 改行")
+                        Text("\\n … 改行（エスケープ表記）")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+                }
             }
+            .padding(24)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .formStyle(.grouped)
-        .padding()
+    }
+
+    @ViewBuilder
+    private func sectionCard<Content: View>(
+        title: String?,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let title {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            content()
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
     }
 }
