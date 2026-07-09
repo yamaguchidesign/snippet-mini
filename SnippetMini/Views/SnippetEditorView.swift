@@ -108,7 +108,7 @@ private struct SnippetFormView: View {
     var body: some View {
         Form {
             Section("タイトル") {
-                TextField("メニューに表示する名前", text: $title)
+                TextField("", text: $title)
                     .onChange(of: title) { _, _ in onSave() }
             }
 
