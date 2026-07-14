@@ -9,6 +9,7 @@ struct SnippetEditorView: View {
     // 選択切り替え時に「新しく読み込んだ内容」が「古いID」へ保存されてしまう
     // 競合（別スニペットへの誤上書き）を防ぐためのガード。
     @State private var isLoadingDraft = false
+    @State private var isShowingStorageSettings = false
 
     var body: some View {
         NavigationSplitView {
@@ -37,6 +38,13 @@ struct SnippetEditorView: View {
                     }
                     .disabled(selection == nil)
                     .help("削除")
+
+                    Button {
+                        isShowingStorageSettings = true
+                    } label: {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                    }
+                    .help("保存先（同期）…")
                 }
             }
         } detail: {
@@ -63,6 +71,16 @@ struct SnippetEditorView: View {
         }
         .onChange(of: selection) { _, _ in
             loadDraftForCurrentSelection()
+        }
+        // 他の Mac の変更を取り込んだとき、編集中でなければ表示を追従させる。
+        .onChange(of: store.snippets) { _, _ in
+            if let selection, !store.snippets.contains(where: { $0.id == selection }) {
+                self.selection = store.snippets.first?.id
+            }
+        }
+        .sheet(isPresented: $isShowingStorageSettings) {
+            StorageSettingsView()
+                .environmentObject(store)
         }
     }
 
