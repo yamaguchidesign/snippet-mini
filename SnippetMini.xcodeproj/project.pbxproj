@@ -9,12 +9,12 @@
 /* Begin PBXBuildFile section */
 		095B14047D7FC12B3ADCC2EB /* SnippetEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04253B04653C1CC650CAC54F /* SnippetEditorView.swift */; };
 		0D9BFF0D8EE7E01271EE85E6 /* SnippetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96A83C41AA5BBBDCF0E1723 /* SnippetStore.swift */; };
+		241469FE9C827C4354E63473 /* StorageWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9125BDA0C6255ECCABA16E /* StorageWatcher.swift */; };
 		24F37242836E754FCC126A66 /* SnippetStorageLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326D257CB7F9FC53236BCD1 /* SnippetStorageLocation.swift */; };
 		40C7AE3DDB1F4A621C06268D /* PasteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0DC5BA2387C01DAE132A631 /* PasteService.swift */; };
 		56C0F8E6C57F92AAA1BFAE03 /* EditorWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC7A3485A34C9DC60E8B063 /* EditorWindowController.swift */; };
 		5A7A30C0D68BB79EEF6BEA1B /* SnippetPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF390B791508825D0C7153B9 /* SnippetPickerView.swift */; };
 		5D4EAE2FF02D411924077009 /* SnippetMiniApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABDDCC9400388988D43705B1 /* SnippetMiniApp.swift */; };
-		6CA8E750704F03F17962D29F /* DirectoryWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92B203B3BAEF943D75F89E33 /* DirectoryWatcher.swift */; };
 		70D68E8748E757A29D2FC4C9 /* StorageSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFCA0E9A27D44231E986B5F9 /* StorageSettingsView.swift */; };
 		7160C48B6B36BD6EE590A22D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 19C44A8D881B75FDAB43B8D0 /* Assets.xcassets */; };
 		88FB3C29C1EDCEFB6CF4EFE4 /* SnippetPickerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F497E228C026ECDB50D9A0 /* SnippetPickerController.swift */; };
@@ -30,7 +30,7 @@
 		19C44A8D881B75FDAB43B8D0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4326D257CB7F9FC53236BCD1 /* SnippetStorageLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetStorageLocation.swift; sourceTree = "<group>"; };
 		4AC7A3485A34C9DC60E8B063 /* EditorWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorWindowController.swift; sourceTree = "<group>"; };
-		92B203B3BAEF943D75F89E33 /* DirectoryWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryWatcher.swift; sourceTree = "<group>"; };
+		4C9125BDA0C6255ECCABA16E /* StorageWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageWatcher.swift; sourceTree = "<group>"; };
 		931A8C411CBBFCC13762DE16 /* Snippet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snippet.swift; sourceTree = "<group>"; };
 		9DDAA7F5B638E5A7AEFB83A3 /* SnippetMini.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SnippetMini.entitlements; sourceTree = "<group>"; };
 		9E6F17B8D0819BA4624A6955 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
@@ -68,12 +68,12 @@
 		4860AEFDD0936A442F6B7D31 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				92B203B3BAEF943D75F89E33 /* DirectoryWatcher.swift */,
 				4AC7A3485A34C9DC60E8B063 /* EditorWindowController.swift */,
 				F0DC5BA2387C01DAE132A631 /* PasteService.swift */,
 				C4F497E228C026ECDB50D9A0 /* SnippetPickerController.swift */,
 				4326D257CB7F9FC53236BCD1 /* SnippetStorageLocation.swift */,
 				D96A83C41AA5BBBDCF0E1723 /* SnippetStore.swift */,
+				4C9125BDA0C6255ECCABA16E /* StorageWatcher.swift */,
 				CC6C19A8576ED595651511B1 /* VariableExpander.swift */,
 			);
 			path = Services;
@@ -182,7 +182,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CB27FBA8CBA6C05443A21777 /* AppDelegate.swift in Sources */,
-				6CA8E750704F03F17962D29F /* DirectoryWatcher.swift in Sources */,
 				56C0F8E6C57F92AAA1BFAE03 /* EditorWindowController.swift in Sources */,
 				893C073E834538C85DCF0356 /* MenuBarContentView.swift in Sources */,
 				40C7AE3DDB1F4A621C06268D /* PasteService.swift in Sources */,
@@ -194,6 +193,7 @@
 				24F37242836E754FCC126A66 /* SnippetStorageLocation.swift in Sources */,
 				0D9BFF0D8EE7E01271EE85E6 /* SnippetStore.swift in Sources */,
 				70D68E8748E757A29D2FC4C9 /* StorageSettingsView.swift in Sources */,
+				241469FE9C827C4354E63473 /* StorageWatcher.swift in Sources */,
 				8E59FBFB8D0D438DEAC8F17C /* VariableExpander.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

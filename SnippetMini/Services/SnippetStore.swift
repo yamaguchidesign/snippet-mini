@@ -12,7 +12,7 @@ final class SnippetStore: ObservableObject {
 
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
-    private var watcher: DirectoryWatcher?
+    private var watcher: StorageWatcher?
     private var pendingSave: DispatchWorkItem?
     private var pendingReload: DispatchWorkItem?
     /// 自分が書いた内容。監視イベントが自分の保存由来なら無視するために使う。
@@ -104,7 +104,7 @@ final class SnippetStore: ObservableObject {
     // MARK: - 同期（他のMacによる変更の取り込み）
 
     private func startWatching() {
-        watcher = DirectoryWatcher(url: storageDirectory) { [weak self] in
+        watcher = StorageWatcher(directory: storageDirectory, fileURL: fileURL) { [weak self] in
             self?.scheduleReload()
         }
     }
