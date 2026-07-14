@@ -101,6 +101,7 @@
 ~/Library/CloudStorage/Dropbox/app_setting/snippet_mini/snippets.json
 ```
 
+- 同じ画面の **「Finder で表示」** で、いま使っている `snippets.json` を Finder で開ける
 - 保存先を切り替えると、移行先に既存のスニペットがあれば**統合**される（どちらも消えない）
 - 他の Mac の変更はファイル監視で**自動的に取り込む**（アプリの再起動は不要）
 - 同じスニペットを両方の Mac で編集した場合は、**後に編集した方**が残る

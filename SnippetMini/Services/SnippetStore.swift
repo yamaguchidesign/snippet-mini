@@ -22,8 +22,19 @@ final class SnippetStore: ObservableObject {
     /// 同期フォルダに置いた他のMacが起動して削除を受け取るまでの猶予。
     private static let tombstoneLifetime: TimeInterval = 60 * 60 * 24 * 30
 
-    private var fileURL: URL {
+    /// 設定ファイルの実体。Finder で表示するために外へ公開している。
+    var fileURL: URL {
         storageDirectory.appendingPathComponent("snippets.json")
+    }
+
+    /// 設定ファイルを Finder で選択状態にして表示する。
+    /// まだ書き出されていない場合は、保存先フォルダを開く。
+    func revealInFinder() {
+        if FileManager.default.fileExists(atPath: fileURL.path) {
+            NSWorkspace.shared.activateFileViewerSelecting([fileURL])
+        } else {
+            NSWorkspace.shared.open(storageDirectory)
+        }
     }
 
     init() {

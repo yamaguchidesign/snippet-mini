@@ -18,11 +18,19 @@ struct StorageSettingsView: View {
             HStack(spacing: 8) {
                 Image(systemName: "folder")
                     .foregroundStyle(.secondary)
-                Text(store.storageDirectory.path)
+                Text(store.fileURL.path)
                     .font(.caption.monospaced())
                     .textSelection(.enabled)
                     .lineLimit(2)
                     .truncationMode(.middle)
+
+                Spacer(minLength: 8)
+
+                Button("Finder で表示") {
+                    store.revealInFinder()
+                }
+                .controlSize(.small)
+                .fixedSize()
             }
             .padding(10)
             .frame(maxWidth: .infinity, alignment: .leading)
