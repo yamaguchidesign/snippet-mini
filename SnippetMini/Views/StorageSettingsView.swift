@@ -1,5 +1,28 @@
 import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
+
+/// 同期する snippets.json 本体、またはそれを置くフォルダを Finder のパネルから選ばせる。
+/// 返り値は保存先フォルダ（ファイルを選んだ場合はその親フォルダ）。
+@MainActor
+enum SnippetSyncFilePicker {
+    static func choose(startingAt directory: URL) -> URL? {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = true
+        panel.canCreateDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = [.json]
+        panel.prompt = "選択"
+        panel.message = "同期する snippets.json、またはそれを置くフォルダを選んでください。"
+        panel.directoryURL = directory
+
+        guard panel.runModal() == .OK, let url = panel.url else { return nil }
+        var isDirectory: ObjCBool = false
+        FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory)
+        return isDirectory.boolValue ? url : url.deletingLastPathComponent()
+    }
+}
 
 struct StorageSettingsView: View {
     @EnvironmentObject private var store: SnippetStore
@@ -51,8 +74,8 @@ struct StorageSettingsView: View {
                 }
                 .disabled(store.storageDirectory == SnippetStorageLocation.local)
 
-                Button("フォルダを選択…") {
-                    chooseFolder()
+                Button("Finder から選択…") {
+                    chooseFromFinder()
                 }
             }
 
@@ -77,17 +100,8 @@ struct StorageSettingsView: View {
         .frame(width: 480)
     }
 
-    private func chooseFolder() {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.canCreateDirectories = true
-        panel.allowsMultipleSelection = false
-        panel.prompt = "選択"
-        panel.message = "snippets.json を置くフォルダを選んでください。"
-        panel.directoryURL = store.storageDirectory
-
-        guard panel.runModal() == .OK, let url = panel.url else { return }
-        store.setStorageDirectory(url)
+    private func chooseFromFinder() {
+        guard let directory = SnippetSyncFilePicker.choose(startingAt: store.storageDirectory) else { return }
+        store.setStorageDirectory(directory)
     }
 }

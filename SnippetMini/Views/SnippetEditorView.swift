@@ -63,6 +63,37 @@ struct SnippetEditorView: View {
             }
         }
         .frame(minWidth: 520, minHeight: 360)
+        // いま同期しているファイルの常設表示。Finder での表示・選択もここから。
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            HStack(spacing: 8) {
+                Image(systemName: "arrow.triangle.2.circlepath")
+                    .foregroundStyle(.secondary)
+
+                Text(store.fileURL.path)
+                    .font(.caption.monospaced())
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .help(store.fileURL.path)
+
+                Spacer(minLength: 8)
+
+                Button("Finder で表示") {
+                    store.revealInFinder()
+                }
+                .controlSize(.small)
+                .help("いま同期しているファイルを Finder で表示")
+
+                Button("同期ファイルを選択…") {
+                    chooseSyncFile()
+                }
+                .controlSize(.small)
+                .help("同期する snippets.json（またはフォルダ）を Finder から選ぶ")
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(.bar)
+        }
         .onAppear {
             if selection == nil {
                 selection = store.snippets.first?.id
@@ -105,6 +136,11 @@ struct SnippetEditorView: View {
         if let newest = store.snippets.last {
             selection = newest.id
         }
+    }
+
+    private func chooseSyncFile() {
+        guard let directory = SnippetSyncFilePicker.choose(startingAt: store.storageDirectory) else { return }
+        store.setStorageDirectory(directory)
     }
 
     private func deleteSelected() {
