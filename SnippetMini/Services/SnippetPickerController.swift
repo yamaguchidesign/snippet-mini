@@ -189,11 +189,14 @@ final class SnippetPickerController: NSObject {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
 
+        // 許可ダイアログを確実に見せるため、他アプリへ戻すのはダイアログを
+        // 閉じた後にする（先に戻すと最前面を奪われ、音だけ鳴って何も見えない）。
+        NSApp.activate(ignoringOtherApps: true)
+        showAccessibilityAlert()
+
         if let previousApp {
             previousApp.activate(options: [.activateIgnoringOtherApps, .activateAllWindows])
         }
-
-        showAccessibilityAlert()
     }
 
     private func showAccessibilityAlert() {
